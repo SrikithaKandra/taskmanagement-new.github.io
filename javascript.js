@@ -240,7 +240,7 @@ function addTask() {
             document.getElementById("courseDescription").value = description;
 
             // Remove the task item from the list
-          
+            course.parentNode.removeChild(course);
 
             // Also remove the course from the add task course options.
             for (var i = 0; i < options.length; i++) {
