@@ -87,29 +87,54 @@ function addTask() {
     var selectedDate = document.getElementById("selectedDate").value;
     var priority = document.getElementById("taskPriority").value;
 
+    var editMode = document.getElementById("addTaskForm").getAttribute("data-edit-mode") === "true";
+    var taskId = document.getElementById("addTaskForm").getAttribute("data-task-id");
+
     if (title.trim() !== "") {
-        var allTasksColumn = document.getElementById("allTasks");
-        var taskItem = document.createElement("div");
-        var taskId = "task" + Date.now();
+        if (!selectedDate) {
+            // If no date is selected, set today's date
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
+            selectedDate = yyyy + '-' + mm + '-' + dd;
+            document.getElementById("selectedDate").value = selectedDate; // Set the input field value
+        }
 
-        var taskItem = document.createElement("div");
-        taskItem.setAttribute("class", "task");
-        taskItem.setAttribute("id", taskId);
-        taskItem.setAttribute("draggable", "true");
-        taskItem.setAttribute("ondragstart", "drag(event)");
+        if (editMode && taskId) {
+            // If in edit mode, update the existing task
+            var taskItem = document.getElementById(taskId);
+            taskItem.querySelector("h3").innerText = `${title} - ${course}`;
+            taskItem.querySelector("p").innerText = description;
+            taskItem.querySelector("p:nth-child(4)").innerHTML = `<strong> Deadline </strong>: ${selectedDate}`; // Update the date field
+            taskItem.querySelector("p:nth-child(3)").innerHTML = `<strong> Priority </strong>: ${priority}`; // Update the priority field
+            // Update other task details if needed
 
-        taskItem.innerHTML = `
-            <h3>${title} - ${course}</h3>
-            <p>${description}</p>
-            <p><strong>Priority:</strong> ${priority}</p>
-            <p><strong>Deadline:</strong> ${selectedDate}</p>
-            <button onclick="completeTask('${taskId}')">Complete</button>
-            <button onclick="editTask('${taskId}')">Edit</button>
-            <button onclick="deleteTask('${taskId}')">Delete</button>
-        `;
+            closeAddTaskModal();
+        } else {
+            // If not in edit mode, add a new task
+            var allTasksColumn = document.getElementById("allTasks");
+            var taskItem = document.createElement("div");
+            var taskId = "task" + Date.now();
 
-        allTasksColumn.appendChild(taskItem);
-        closeAddTaskModal();
+            taskItem.setAttribute("class", "task");
+            taskItem.setAttribute("id", taskId);
+            taskItem.setAttribute("draggable", "true");
+            taskItem.setAttribute("ondragstart", "drag(event)");
+
+            taskItem.innerHTML = `
+                <h3>${title} - ${course}</h3>
+                <p>${description}</p>
+                <p>Priority: ${priority}</p>
+                <p>Deadline: ${selectedDate}</p>
+                <button onclick="completeTask('${taskId}')">Complete</button>
+                <button onclick="editTask('${taskId}')">Edit</button>
+                <button onclick="deleteTask('${taskId}')">Delete</button>
+            `;
+
+            allTasksColumn.appendChild(taskItem);
+            closeAddTaskModal();
+        }
 
         return false;
     } else {
@@ -148,21 +173,35 @@ function addTask() {
             }
         }
 
-
         function editTask(taskId) {
             var taskItem = document.getElementById(taskId);
             var title = taskItem.querySelector("h3").innerText;
             var description = taskItem.querySelector("p").innerText;
+            var selectedDate = taskItem.querySelector("p:nth-child(4)").innerText;
+            var priority = taskItem.querySelector("p:nth-child(3)").innerText.trim();
+        
             // Set form fields with task details for editing
-            // Title also contains the course, which needs to be removed before updating new title.
-            document.getElementById("taskTitle").value = title.substring(0, title.indexOf("-"));
+            document.getElementById("taskTitle").value = title.substring(0, title.indexOf("-")).trim();
             document.getElementById("taskDescription").value = description;
-
-            // Remove the task item from the list
-            taskItem.parentNode.removeChild(taskItem);
-
+            document.getElementById("selectedDate").value = selectedDate;
+            document.getElementById("taskPriority").value = priority;
+        
+            // Set the course option
+            var course = title.substring(title.indexOf("-") + 1).trim();
+            document.getElementById("courseOptions").value = course;
+        
+            // Open the AddTaskModal window
             openAddTaskModal();
+        
+            // Set attributes to indicate edit mode and task ID
+            document.getElementById("addTaskForm").setAttribute("data-edit-mode", "true");
+            document.getElementById("addTaskForm").setAttribute("data-task-id", taskId);
         }
+        
+        
+
+
+    
 
         function deleteTask(taskId) {
             var taskItem = document.getElementById(taskId);
