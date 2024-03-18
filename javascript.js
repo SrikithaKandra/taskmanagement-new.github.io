@@ -197,15 +197,17 @@ function addTask() {
             document.getElementById("addTaskForm").setAttribute("data-edit-mode", "true");
             document.getElementById("addTaskForm").setAttribute("data-task-id", taskId);
         }
-        
-        
 
+        // Flag and event handler for delete confirmation.
+        var deleteOption = false;
+        document.getElementById("yesDeleteTask").onclick = function() {
 
-    
+        }
 
         function deleteTask(taskId) {
             var taskItem = document.getElementById(taskId);
-            if (taskItem) {
+            // Ask for confirmation before deleting.
+            if (window.confirm("Are you sure you want to delete this?") && taskItem) {
                 taskItem.parentNode.removeChild(taskItem);
             }
         }
@@ -296,7 +298,7 @@ function addTask() {
             var courseOptionsBar = document.getElementById("courseOptions");
             var options = courseOptionsBar.options;
 
-            if (course) {
+            if (window.confirm("Are you sure you would like to delete this?") && course) {
                 course.parentNode.removeChild(course);
                 // This is to make sure users cannot choose the deleted course when adding tasks.
                 for (var i = 0; i < options.length; i++) {
